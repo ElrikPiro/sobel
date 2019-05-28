@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
+#include <sobel.hpp>
 
 using namespace cv;
 
@@ -32,7 +33,7 @@ int main(int argc, char** argv )
     /*
      * TODO: Here comes the call to sobel
      *
-     * sobel(image);
+     * sobel(&image);
      *
      */
 
