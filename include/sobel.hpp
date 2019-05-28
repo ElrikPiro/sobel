@@ -9,34 +9,64 @@
 #define INCLUDE_SOBEL_HPP_
 
 #include <opencv2/opencv.hpp>
+#include <cmath>
+#include <cstring>
 
+using namespace cv;
 
-/**
- * function sobel(A : as two dimensional image array)
-	Gx=[-1 0 1; -2 0 2; -1 0 1]
-	Gy=[-1 -2 -1; 0 0 0; 1 2 1]
+int sobel(Mat);
+int sum(int[3][3],Mat*, int i, int j);
+unsigned char usqrt(unsigned char S);
 
-	rows = size(A,1)
-	columns = size(A,2)
-	mag=zeros(A)
+int sobel(Mat *img) {
+	int S1, S2;
 
-	for i=1:rows-2
-		for j=1:columns-2
-			S1=sum(sum(Gx.*A(i:i+2,j:j+2)))
-			S2=sum(sum(Gy.*A(i:i+2,j:j+2)))
+	int x[3][3]  = {
+					{ -1 , 0 , 1 },
+					{ -2 , 0 , 2 },
+					{ -1 , 0 , 1 }
+		};
+	int y[3][3] = {
+			{ -1, -2, -1 },
+			{ 0 , 0 , 0  },
+			{ 1 , 2 , 1  }
+	};
 
-			mag(i+1,j+1)=sqrt(S1.^2+S2.^2)
-		end for
-	end for
+	int rows = img->rows;
+	int cols = img->cols;
+	Mat mag = mag.zeros(rows,cols,img->type());
 
-	threshold = 70 %varies for application [0 255]
-	output_image = max(mag,threshold)
-	output_image(output_image==round(threshold))=0;
-	return output_image
-end function
- */
+	unsigned char value = 0;
+	for(int i = 1 ; i < rows - 2 ; i++){
+		for(int j = 1 ; j < cols - 2 ; j++){
+			S1 = sum(x, img, i, j);
+			S2 = sum(y, img, i, j);
 
-int sobel()
+			value = (unsigned char) max(70.0,ceil(sqrt(S1 * S1 + S2 * S2)));
+			if(value == 70) value = 0;
 
+			std::memcpy(mag.data+(i*cols+j),&value,sizeof(unsigned char));
+
+		}
+	}
+
+	std::memcpy(img->data,mag.data,cols*rows*sizeof(unsigned char));
+
+	return 0;
+
+}
+
+int sum(int data[3][3], Mat *img, int y, int x){
+
+	unsigned char dat[9] = {0,0,0,0,0,0,0,0};
+	int cols = img->cols;
+	std::memcpy(&dat[0],img->data+((y-1)*cols+(x-1)),sizeof(unsigned char)*3);
+	std::memcpy(&dat[3],img->data+((y)*cols+(x-1)),sizeof(unsigned char)*3);
+	std::memcpy(&dat[6],img->data+((y+1)*cols+(x-1)),sizeof(unsigned char)*3);
+	return (int) (data[0][0] * dat[0]) + (data[0][1] * dat[1]) + (data[0][2] * dat[2]) +
+	         (data[1][0] * dat[3])   + (data[1][1] * dat[4])   + (data[1][2] * dat[5]) +
+	         (data[2][0] * dat[6]) + (data[2][1] * dat[7]) + (data[2][2] * dat[8]);
+
+}
 
 #endif /* INCLUDE_SOBEL_HPP_ */

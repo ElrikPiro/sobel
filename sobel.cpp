@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <sobel.hpp>
+#include <string>
 
 using namespace cv;
 
@@ -22,7 +23,7 @@ int main(int argc, char** argv )
         return -1;
     }
 
-    Mat image;
+    Mat image, sobelimg;
     image = imread( argv[1], 1 );
     if ( !image.data )
     {
@@ -30,16 +31,22 @@ int main(int argc, char** argv )
         return -1;
     }
 
-    /*
-     * TODO: Here comes the call to sobel
-     *
-     * sobel(&image);
-     *
-     */
+    cvtColor(image,sobelimg,6);
+    sobel(&sobelimg);
 
-    namedWindow("Display Image", WINDOW_AUTOSIZE );
-    imshow("Display Image", image);
+    #ifdef DEBUG
+    namedWindow("Original Image", WINDOW_AUTOSIZE );
+    imshow("Original Image", image);
+    namedWindow("Sobel Image", WINDOW_AUTOSIZE );
+    imshow("Sobel Image", sobelimg);
 
     waitKey(0);
+	#endif
+
+    std::string file(argv[1]);
+    std::string extension;
+    extension = file.substr(file.find_last_of("."));
+    imwrite( std::string("output") + extension , sobelimg );
+
     return 0;
 }
