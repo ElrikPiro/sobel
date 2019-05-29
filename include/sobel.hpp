@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include <cmath>
 #include <cstring>
+#include <omp.h>
 
 using namespace cv;
 
@@ -37,6 +38,8 @@ int sobel(Mat *img) {
 	Mat mag = mag.zeros(rows,cols,img->type());
 
 	unsigned char value = 0;
+
+	#pragma omp parallel for collapse(2) private(S1,S2,value)
 	for(int i = 1 ; i < rows - 2 ; i++){
 		for(int j = 1 ; j < cols - 2 ; j++){
 			S1 = sum(x, img, i, j);
@@ -46,7 +49,6 @@ int sobel(Mat *img) {
 			if(value == 70) value = 0;
 
 			std::memcpy(mag.data+(i*cols+j),&value,sizeof(unsigned char));
-
 		}
 	}
 
